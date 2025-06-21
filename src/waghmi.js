@@ -13,3 +13,5 @@ export const config = getDefaultConfig({
   },
   ssr: false,
 });
+
+// wallet-connect config
