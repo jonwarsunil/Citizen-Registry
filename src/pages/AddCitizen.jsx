@@ -73,22 +73,22 @@ const AddCitizen = () => {
           <h2 className='text-[#111518] text-2xl sm:text-3xl font-bold mb-6'>Add New Citizen</h2>
           <form onSubmit={handleSubmit} className='space-y-6'>
             <div>
-              <label className='block text-[#111518] font-medium mb-2'>Full Name</label>
+              <label className='label-style'>Full Name</label>
               <InputField name='name' placeholder='Enter full name' value={formData.name} onChange={handleChange} />
             </div>
 
             <div>
-              <label className='block text-[#111518] font-medium mb-2'>Age</label>
+              <label className='label-style'>Age</label>
               <InputField name='age' placeholder='Enter age' value={formData.age} onChange={handleChange} />
             </div>
 
             <div>
-              <label className='block text-[#111518] font-medium mb-2'>City</label>
+              <label className='label-style'>City</label>
               <InputField name='city' placeholder='Enter city' value={formData.city} onChange={handleChange} />
             </div>
 
             <div>
-              <label className='block text-[#111518] font-medium mb-2'>Additional Notes</label>
+              <label className='label-style'>Additional Notes</label>
               <textarea
                 name='note'
                 placeholder='Enter any additional notes'

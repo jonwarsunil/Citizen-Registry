@@ -1,3 +1,5 @@
+export const CITIZEN_CONTRACT_ADDRESS = import.meta.env.VITE_CITIZEN_CONTRACT_ADDRESS;
+
 export const CITIZEN_CONTRACT_ABI = [
   {
     inputs: [],
@@ -83,5 +85,3 @@ export const CITIZEN_CONTRACT_ABI = [
     type: 'function',
   },
 ];
-
-export const CITIZEN_CONTRACT_ADDRESS = '0xa011799d9467d2b33768fb1a3512f1b468b87e96';
