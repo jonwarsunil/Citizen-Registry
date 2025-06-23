@@ -18,13 +18,13 @@ export default function Header() {
 
           {/* Desktop nav */}
           <nav className='hidden sm:flex gap-8 items-center text-sm font-normal text-[#121417]'>
-            <Link to='/' className='hover:underline'>
+            <Link to='/' className='hover:underline hover:text-[#75a1c1]'>
               Home
             </Link>
-            <Link to='/citizens' className='hover:underline'>
+            <Link to='/citizens' className='hover:underline hover:text-[#75a1c1]'>
               Citizens
             </Link>
-            <Link to='/create' className='hover:underline'>
+            <Link to='/create' className='hover:underline hover:text-[#75a1c1]'>
               Add Citizen
             </Link>
             <WalletConnect compact />
@@ -66,13 +66,13 @@ export default function Header() {
         {/* Mobile dropdown */}
         {isMenuOpen && (
           <div className='sm:hidden flex flex-col gap-4 px-4 pb-4 text-sm font-normal text-[#121417]'>
-            <Link to='/' className='hover:underline' onClick={() => setIsMenuOpen(false)}>
+            <Link to='/' className='hover:underline hover:text-[#75a1c1]' onClick={() => setIsMenuOpen(false)}>
               Home
             </Link>
-            <Link to='/citizens' className='hover:underline' onClick={() => setIsMenuOpen(false)}>
+            <Link to='/citizens' className='hover:underline hover:text-[#75a1c1]' onClick={() => setIsMenuOpen(false)}>
               Citizens
             </Link>
-            <Link to='/create' className='hover:underline' onClick={() => setIsMenuOpen(false)}>
+            <Link to='/create' className='hover:underline hover:text-[#75a1c1]' onClick={() => setIsMenuOpen(false)}>
               Add Citizen
             </Link>
           </div>
