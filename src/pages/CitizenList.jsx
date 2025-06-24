@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useMemo } from 'react';
-import { createPublicClient, http, parseAbiItem, getContract } from 'viem';
+import { useReadContracts } from 'wagmi';
+import { createPublicClient, http, parseAbiItem } from 'viem';
 import { sepolia } from 'viem/chains';
 import Spinner from '../components/Spinner';
 import Button from '../components/Button';
@@ -19,18 +20,13 @@ export default function CitizenList() {
 
   useEffect(() => {
     const loadCitizens = async () => {
-      const publicClient = createPublicClient({
-        chain: sepolia,
-        transport: http(`https://sepolia.infura.io/v3/${infuraKey}`),
-      });
-
-      const contract = getContract({
-        abi: CITIZEN_CONTRACT_ABI,
-        address: CITIZEN_CONTRACT_ADDRESS,
-        client: publicClient,
-      });
-
+      setLoading(true);
       try {
+        const publicClient = createPublicClient({
+          chain: sepolia,
+          transport: http(`https://sepolia.infura.io/v3/${infuraKey}`),
+        });
+
         const latestBlock = await publicClient.getBlockNumber();
 
         const citizenEvent = parseAbiItem(
@@ -44,28 +40,19 @@ export default function CitizenList() {
           toBlock: latestBlock,
         });
 
-        const citizens = await Promise.all(
-          logs.map(async log => {
-            const { id, age, city, name } = log.args;
-            let note = '—';
-            try {
-              note = await contract.read.getNoteByCitizenId([id]);
-            } catch (e) {
-              console.warn(`Note fetch failed for ID ${id}:`, e.message);
-            }
-            return {
-              id: Number(id),
-              age: Number(age),
-              city,
-              name,
-              note,
-            };
-          })
-        );
+        const data = logs.map(log => {
+          const { id, age, city, name } = log.args;
+          return {
+            id: Number(id),
+            age: Number(age),
+            city,
+            name,
+          };
+        });
 
-        setCitizens(citizens.reverse());
-      } catch (err) {
-        console.error('Failed to load citizen logs:', err);
+        setCitizens(data.reverse());
+      } catch (error) {
+        console.error('Failed to load citizen logs:', error);
       } finally {
         setLoading(false);
       }
@@ -76,8 +63,8 @@ export default function CitizenList() {
 
   const filteredCitizens = useMemo(() => {
     const lowerSearch = searchTerm.toLowerCase();
-    return citizens.filter(({ name, city, note }) =>
-      [name, city, note].some(field => (field || '').toLowerCase().includes(lowerSearch))
+    return citizens.filter(({ name, city }) =>
+      [name, city].some(field => (field || '').toLowerCase().includes(lowerSearch))
     );
   }, [searchTerm, citizens]);
 
@@ -87,9 +74,17 @@ export default function CitizenList() {
     return filteredCitizens.slice(start, start + ITEMS_PER_PAGE);
   }, [filteredCitizens, currentPage]);
 
-  useEffect(() => {
-    if (currentPage > totalPages) setCurrentPage(1);
-  }, [totalPages]);
+  const noteReads = useReadContracts({
+    contracts: paginatedCitizens.map(({ id }) => ({
+      address: CITIZEN_CONTRACT_ADDRESS,
+      abi: CITIZEN_CONTRACT_ABI,
+      functionName: 'getNoteByCitizenId',
+      args: [BigInt(id)],
+    })),
+    watch: false,
+  });
+
+  const notes = noteReads?.data || [];
 
   if (loading) return <Spinner />;
 
@@ -137,12 +132,20 @@ export default function CitizenList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {paginatedCitizens.map(({ id, name, age, city, note }) => (
-                    <tr key={id} className='border-t border-gray-300'>
-                      <td className='px-2 py-3 sm:px-4 text-[#121416]'>{name}</td>
-                      <td className='px-2 py-3 sm:px-4 text-[#6a7681]'>{age}</td>
-                      <td className='px-2 py-3 sm:px-4 text-[#6a7681] break-words'>{city}</td>
-                      <td className='px-2 py-3 sm:px-4 text-[#6a7681]'>{note}</td>
+                  {paginatedCitizens.map((citizen, idx) => (
+                    <tr key={citizen.id} className='border-t border-gray-300'>
+                      <td className='px-2 py-3 sm:px-4 text-[#121416]'>{citizen.name}</td>
+                      <td className='px-2 py-3 sm:px-4 text-[#6a7681]'>{citizen.age}</td>
+                      <td className='px-2 py-3 sm:px-4 text-[#6a7681] break-words'>{citizen.city}</td>
+                      <td className='px-2 py-3 sm:px-4 text-[#6a7681]'>
+                        {noteReads.isLoading ? (
+                          <div className='h-3 w-20 bg-gray-300 rounded animate-pulse'></div>
+                        ) : noteReads.isSuccess && notes[idx]?.result ? (
+                          notes[idx].result
+                        ) : (
+                          '—'
+                        )}
+                      </td>
                     </tr>
                   ))}
                 </tbody>
